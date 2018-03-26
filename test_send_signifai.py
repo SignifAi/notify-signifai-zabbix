@@ -10,6 +10,7 @@ import os
 import socket
 import time
 import unittest
+import unittest.mock
 
 import send_signifai
 
@@ -18,27 +19,9 @@ try:
 except ImportError:
     import httplib as http_client
 
-_dt = datetime.datetime
-
 __author__ = "SignifAI, Inc."
 __copyright__ = "Copyright (C) 2018, SignifAI, Inc."
 __version__ = "1.0"
-
-
-class DTObj(object):
-    def __init__(self, dt):
-        self.dt = dt
-
-    def now(self):
-        return self.dt
-
-    def __call__(self, year=None, month=None, day=None,
-                 hour=None, minute=None, second=None):
-        """
-        In This Object we pretend to be the datetime class too
-        So if we're actually called like a callable, return a datetime obj
-        """
-        return _dt(year, month, day, hour, minute, second)
 
 
 class BaseHTTPSRespMock(object):
@@ -451,13 +434,14 @@ class TestPrepareRESTEvent(unittest.TestCase):
         the time of the event should be the current time
         """
         event = self.BEST_CASE.copy()
-        h = _dt.now()
-        datetime.datetime = DTObj(h)
-
+        h = datetime.datetime.now()
         event.pop("EVENT.DATE")
 
-        j = send_signifai.prepare_REST_event(event)
-        datetime.datetime = _dt
+        with unittest.mock.patch('datetime.datetime') as MockDT:
+            MockDT.now = unittest.mock.MagicMock(return_value=h)
+
+            j = send_signifai.prepare_REST_event(event)
+
         self.assertEqual(j['timestamp'], int(time.mktime(h.timetuple())))
 
     def test_date_without_time(self):
