@@ -58,6 +58,7 @@ MORE_MAPS = {
 
 DEFAULT_POST_URI = "/v1/incidents"
 
+
 def bugsnag_notify(exception, metadata, log=None):
     if not log:
         log = logging.getLogger("bugsnag_unattached_notify")
@@ -217,7 +218,18 @@ def parse_zabbix_msg(data):
 
 
 def zabbix_key_to_signifai_key(k):
-    return k.lower().replace(".", "/").replace(" ", "_").replace("(", "").replace(")", "")
+    i = k.lower()
+    replacements = [
+        (".", "/"),
+        (" ", "_"),
+        ("(", ""),
+        (")", "")
+    ]
+
+    for rep in replacements:
+        i = i.replace(*rep)
+
+    return i
 
 
 def prepare_REST_event(parsed_data):
@@ -246,7 +258,9 @@ def prepare_REST_event(parsed_data):
             elif k == "EVENT.TIME":
                 try:
                     hour, minute, second = v.split(":")
-                    event_time = datetime_time(int(hour), int(minute), int(second))
+                    event_time = datetime_time(int(hour),
+                                               int(minute),
+                                               int(second))
                 except (ValueError, TypeError) as e:
                     pass
             else:
@@ -265,7 +279,8 @@ def prepare_REST_event(parsed_data):
         event_date = datetime.now()
 
     if provided:
-        raise ValueError("Missing attributes: {attribs}".format(attribs=str.join(", ", provided)))
+        raise ValueError("Missing attributes: {attribs}".format(
+            attribs=str.join(", ", provided)))
 
     event["timestamp"] = int(time.mktime(event_date.timetuple()))
     event["event_source"] = "zabbix"
@@ -296,7 +311,7 @@ def main(argv=sys.argv):
     try:
         msg_data = parse_zabbix_msg(message_data)
         REST_event = prepare_REST_event(msg_data)
-    except ValueError as val_err:
+    except (ValueError, KeyError) as val_err:
         print("Error validating/preparing event: {msg}".format(msg=val_err))
         return 1
 

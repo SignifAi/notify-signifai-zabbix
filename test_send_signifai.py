@@ -32,7 +32,8 @@ class DTObj(object):
     def now(self):
         return self.dt
 
-    def __call__(self, year=None, month=None, day=None, hour=None, minute=None, second=None):
+    def __call__(self, year=None, month=None, day=None,
+                 hour=None, minute=None, second=None):
         """
         In This Object we pretend to be the datetime class too
         So if we're actually called like a callable, return a datetime obj
@@ -369,7 +370,9 @@ class TestParseZabbixMsg(unittest.TestCase):
 
     def test_colon_only_after_brokenness(self):
         with self.assertRaises(ValueError):
-            send_signifai.parse_zabbix_msg("this template has some valid bits but is not valid\nsomeData: true")
+            send_signifai.parse_zabbix_msg(
+                "this template has some valid bits but is not valid\n"
+                "someData: true")
 
     def test_success_parse(self):
         h = "data1: value1\ndata2: value2"
@@ -379,7 +382,10 @@ class TestParseZabbixMsg(unittest.TestCase):
     def test_success_parse_multiline_value(self):
         h = "data1: value1\ndata2: value2\nvalue2 part 2"
         j = send_signifai.parse_zabbix_msg(h)
-        self.assertEqual(j, {"data1": "value1", "data2": "value2\nvalue2 part 2"})
+        self.assertEqual(j, {
+            "data1": "value1",
+            "data2": "value2\nvalue2 part 2"
+        })
 
     def test_multiline_with_colon_is_two_different_keys(self):
         """
@@ -398,7 +404,9 @@ class TestParseZabbixMsg(unittest.TestCase):
         it's here.
         """
 
-        h = "data1: value1\ndata2: value2\nBut then this part of value2: has a colon"
+        h = str.join("\n", ["data1: value1",
+                            "data2: value2",
+                            "But then this part of value2: has a colon"])
         j = send_signifai.parse_zabbix_msg(h)
         self.assertEqual(j, {
             "data1": "value1",
@@ -479,8 +487,10 @@ class TestPrepareRESTEvent(unittest.TestCase):
         event["AWESOME.ATTR WITH SPACES"] = "beep"
 
         j = send_signifai.prepare_REST_event(event)
-        self.assertEqual(j['attributes']['zabbix/awesome/attr'], "andyisthebest")
-        self.assertEqual(j['attributes']['zabbix/awesome/attr_with_spaces'], "beep")
+        awesome_attr_1 = j["attributes"]["zabbix/awesome/attr"]
+        awesome_attr_2 = j["attributes"]["zabbix/awesome/attr_with_spaces"]
+        self.assertEqual(awesome_attr_1, "andyisthebest")
+        self.assertEqual(awesome_attr_2, "beep")
 
     def test_best_case(self):
         j = send_signifai.prepare_REST_event(self.BEST_CASE)
