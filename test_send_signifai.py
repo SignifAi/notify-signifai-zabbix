@@ -168,7 +168,7 @@ class TestHTTPPost(unittest.TestCase):
                 # the connection object completely, so we need
                 # to store the retries in the class, _not_ the
                 # instance
-                if self.__class__.tries < (total_retries-1):
+                if self.__class__.tries < (total_retries - 1):
                     self.__class__.tries += 1
                     raise socket.timeout
                 else:
@@ -303,8 +303,8 @@ class TestHTTPPost(unittest.TestCase):
 
             def getresponse(self):
                 return BaseHTTPSRespMock(json.dumps({
-                        "success": True,
-                        "failed_events": self.failed_events
+                    "success": True,
+                    "failed_events": self.failed_events
                 }))
 
         result = send_signifai.POST_data(auth_key="", data=events,
