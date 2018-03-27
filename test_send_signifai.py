@@ -361,13 +361,12 @@ class TestParseZabbixMsg(unittest.TestCase):
 
 class TestPrepareRESTEvent(unittest.TestCase):
     BEST_CASE = {
-        "EVENT.DATE": "2018-01-14",
+        "EVENT.DATE": "2018.01.14",
         "EVENT.TIME": "02:31:00",
         "TRIGGER.DESCRIPTION": "Something went wrong!",
         "TRIGGER.ID": "1515",
         "TRIGGER.NSEVERITY": "5",
         "TRIGGER.NAME": "boopHost",
-        "NODE.NAME": "zabbix01",
         "TRIGGER.EXPRESSION": "errors >= 1",
         "HOST.NAME": "testhost01.zabbix.net",
         "TRIGGER.STATUS": "Problem"
@@ -445,11 +444,10 @@ class TestPrepareRESTEvent(unittest.TestCase):
             "value": "critical",
             "timestamp": 1515925860,
             "event_source": "zabbix",
-            "event_description": "Something went wrong!",
+            "application": "1515",
+            "event_description": "boopHost",
             "attributes": {
-                "alert/id": "1515",
-                "alert/title": "boopHost",
-                "alert/monitoring_host": "zabbix01",
+                "annotations/description": "Something went wrong!",
                 "alert/condition": "errors >= 1",
                 "state": "alarm"
             }

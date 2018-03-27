@@ -30,14 +30,13 @@ __copyright__ = "Copyright (C) 2018, SignifAI, Inc."
 __version__ = "1.0"
 
 ATTR_MAP = {
-    "TRIGGER.DESCRIPTION": "event_description",
-    "TRIGGER.ID": "alert/id",
-    "TRIGGER.NAME": "alert/title",
+    "TRIGGER.DESCRIPTION": "annotations/description",
+    "TRIGGER.ID": "application",
+    "TRIGGER.NAME": "event_description",
     "TRIGGER.NSEVERITY": "value",
     "HOST.NAME": "host",
     "TRIGGER.STATUS": "state",
     "TRIGGER.EXPRESSION": "alert/condition",
-    "NODE.NAME": "alert/monitoring_host"
 }
 BARE_ATTRS = set(["state"])
 
@@ -254,7 +253,7 @@ def prepare_REST_event(parsed_data):
         else:
             if k == "EVENT.DATE":
                 try:
-                    year, month, day = v.split("-")
+                    year, month, day = v.split(".")
                     event_date = datetime(int(year), int(month), int(day))
                 except (ValueError, TypeError) as e:
                     pass
@@ -266,6 +265,9 @@ def prepare_REST_event(parsed_data):
                                                int(second))
                 except (ValueError, TypeError) as e:
                     pass
+            elif k == "_API_KEY":
+                # We don't want to pass this on as an attribute
+                pass
             else:
                 dst_key = "zabbix/{rekey}".format(
                     rekey=zabbix_key_to_signifai_key(k))
@@ -313,6 +315,8 @@ def main(argv=sys.argv):
 
     try:
         msg_data = parse_zabbix_msg(message_data)
+        if '_API_KEY' in msg_data:
+            api_key = msg_data.pop('_API_KEY')
         REST_event = prepare_REST_event(msg_data)
     except (ValueError, KeyError) as val_err:
         print("Error validating/preparing event: {msg}".format(msg=val_err))
