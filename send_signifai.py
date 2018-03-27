@@ -78,9 +78,8 @@ def HTTP_connect(signifai_host, signifai_port, bugsnag_metadata,
                  timeout=5, attempts=5, httpsconn=http_client.HTTPSConnection):
     log = logging.getLogger("http_post")
     client = None
-    retries = 0
-    while client is None and retries < attempts:
-        bugsnag_metadata['retries'] = retries
+    for retry in range(attempts):
+        bugsnag_metadata['retries'] = retry
         try:
             client = httpsconn(host=signifai_host,
                                port=signifai_port,
@@ -96,15 +95,15 @@ def HTTP_connect(signifai_host, signifai_port, bugsnag_metadata,
         except socket.timeout:
             # try again until we expire
             log.info("Connection timed out; on retry {retries} of {attempts}"
-                     .format(retries=retries, attempts=attempts))
-            retries += 1
+                     .format(retries=retry, attempts=attempts))
             client.close()
-            client = None
         except (http_client.HTTPException, socket.error) as http_exc:
             log.fatal("Couldn't connect to SignifAi collector", exc_info=True)
             bugsnag_notify(http_exc, bugsnag_metadata)
-            client = None
-            retries += 1
+        else:
+            break
+    else:
+        client = None
 
     return client
 
