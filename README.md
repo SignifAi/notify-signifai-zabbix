@@ -57,7 +57,7 @@ Copy send_signifai.py directly into that directory and `chmod 0755` it.
 18. Check everything in the popup. (The SignifAI user must have at least
     read access to everything to get notifications)
 19. Once everything is selected, click the Save button at the bottom of
-    the page. (You can remove the ")
+    the page. 
 
 ## 3. Adding the reporting action
 1. Enter the Configuration page from the top tabs of the screen
