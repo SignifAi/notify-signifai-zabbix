@@ -112,8 +112,8 @@ class TestHTTPPost(unittest.TestCase):
         result = send_signifai.POST_data(auth_key="", data=self.events,
                                          httpsconn=AlwaysThrowOnConnect)
         self.assertFalse(result)
-        # Ensure we don't attempt a retry
-        self.assertEqual(AlwaysThrowOnConnect.retries, 1)
+        # Ensure we attempted retries
+        self.assertEqual(AlwaysThrowOnConnect.retries, 5)
 
     #   - Retry mechanism
     def test_connect_retries_fail(self):

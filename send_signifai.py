@@ -74,28 +74,13 @@ def bugsnag_notify(exception, metadata, log=None):
         log.warning("Failed to notify bugsnag anyway", exc_info=True)
 
 
-def POST_data(auth_key, data,
-              signifai_host="collectors.signifai.io",
-              signifai_port=http_client.HTTPS_PORT,
-              signifai_uri=DEFAULT_POST_URI,
-              timeout=5,
-              attempts=5,
-              httpsconn=http_client.HTTPSConnection):
+def HTTP_connect(signifai_host, signifai_port, bugsnag_metadata,
+                 timeout=5, attempts=5, httpsconn=http_client.HTTPSConnection):
     log = logging.getLogger("http_post")
     client = None
     retries = 0
-    bmd = {
-        "data": data,
-        "signifai_host": signifai_host,
-        "signifai_port": signifai_port,
-        "signifai_uri": signifai_uri,
-        "timeout": timeout,
-        "retries": retries,
-        "attempts": attempts,
-        "httpsconn_class": httpsconn.__name__
-    }
     while client is None and retries < attempts:
-        bmd['retries'] = retries
+        bugsnag_metadata['retries'] = retries
         try:
             client = httpsconn(host=signifai_host,
                                port=signifai_port,
@@ -103,8 +88,8 @@ def POST_data(auth_key, data,
         except http_client.HTTPException as http_exc:
             # uh, if we can't even create the object, we're toast
             log.fatal("Couldn't create HTTP connection object", exc_info=True)
-            bugsnag_notify(http_exc, bmd)
-            return False
+            bugsnag_notify(http_exc, bugsnag_metadata)
+            break
 
         try:
             client.connect()
@@ -115,17 +100,43 @@ def POST_data(auth_key, data,
             retries += 1
             client.close()
             client = None
-            continue
         except (http_client.HTTPException, socket.error) as http_exc:
             log.fatal("Couldn't connect to SignifAi collector", exc_info=True)
-            bugsnag_notify(http_exc, bmd)
-            return False
+            bugsnag_notify(http_exc, bugsnag_metadata)
+            client = None
+            retries += 1
 
-    if client is None and retries == attempts:
+    return client
+
+
+def POST_data(auth_key, data,
+              signifai_host="collectors.signifai.io",
+              signifai_port=http_client.HTTPS_PORT,
+              signifai_uri=DEFAULT_POST_URI,
+              timeout=5,
+              attempts=5,
+              httpsconn=http_client.HTTPSConnection):
+    log = logging.getLogger("http_post")
+    client = None
+    retries = 0
+    bugsnag_metadata = {
+        "data": data,
+        "signifai_host": signifai_host,
+        "signifai_port": signifai_port,
+        "signifai_uri": signifai_uri,
+        "timeout": timeout,
+        "retries": retries,
+        "attempts": attempts,
+        "httpsconn_class": httpsconn.__name__
+    }
+
+    client = HTTP_connect(signifai_host, signifai_port, bugsnag_metadata,
+                          timeout, attempts, httpsconn)
+    if client is None:
         # we expired
         log.fatal("Could not connect successfully after {attempts} attempts"
                   .format(attempts=attempts))
-        bugsnag_notify(socket.timeout, bmd)
+        bugsnag_notify(socket.timeout, bugsnag_metadata)
         return False
     else:
         headers = {
@@ -133,48 +144,36 @@ def POST_data(auth_key, data,
             "Content-Type": "application/json",
             "Accept": "application/json"
         }
-        bmd['headers'] = headers
-        res = None
+        bugsnag_metadata['headers'] = headers
         try:
             client.request("POST", signifai_uri, body=json.dumps(data),
                            headers=headers)
+            res = client.getresponse()
         except socket.timeout as exc:
             # ... don't think we should retry the POST
             log.fatal("POST timed out...?")
-            bugsnag_notify(exc, bmd)
+            bugsnag_notify(exc, bugsnag_metadata)
             return False
         except (http_client.HTTPException, socket.error) as http_exc:
             # nope
             log.fatal("Couldn't POST to SignifAi Collector", exc_info=True)
-            bugsnag_notify(http_exc, bmd)
-            return False
-
-        try:
-            res = client.getresponse()
-        except socket.timeout as exc:
-            # ... don't think we should retry here
-            log.fatal("Response from server timed out...?")
-            bugsnag_notify(exc, bmd)
-            return False
-        except (http_client.HTTPException, socket.error) as http_exc:
-            log.fatal("Couldn't get server response")
-            bugsnag_notify(http_exc, bmd)
+            bugsnag_notify(http_exc, bugsnag_metadata)
             return False
 
         if 200 <= res.status < 300:
             response_text = None
             try:
                 response_text = res.read()
-                bmd['collector_response'] = response_text
+                bugsnag_metadata['collector_response'] = response_text
                 collector_response = json.loads(response_text)
             except ValueError as exc:
                 log.fatal("Didn't receive valid JSON response from collector")
-                bugsnag_notify(exc, bmd)
+                bugsnag_notify(exc, bugsnag_metadata)
                 return False
             except IOError as exc:
                 log.fatal("Couldn't read response from collector",
                           exc_info=True)
-                bugsnag_notify(exc, bmd)
+                bugsnag_notify(exc, bugsnag_metadata)
             else:
                 if (not collector_response['success'] or
                         collector_response['failed_events']):
@@ -182,8 +181,10 @@ def POST_data(auth_key, data,
                     log.fatal("Errors submitting events: {errs}"
                               .format(errs=errs))
                     # Treat it like a ValueError for bugsnag
-                    bmd['failed_events'] = collector_response['failed_events']
-                    bugsnag_notify(ValueError("errors submitting events"), bmd)
+                    failed_events = collector_response['failed_events']
+                    bugsnag_metadata['failed_events'] = failed_events
+                    bugsnag_notify(ValueError("errors submitting events"),
+                                   bugsnag_metadata)
                     # not really False but not really True
                     return None
                 else:
@@ -191,10 +192,11 @@ def POST_data(auth_key, data,
         else:
             log.fatal("Received error from SignifAi Collector, body follows: ")
             response_text = res.read()
-            bmd['collector_response'] = response_text
+            bugsnag_metadata['collector_response'] = response_text
             log.fatal(response_text)
 
-            bugsnag_notify(ValueError("Error from SignifAi collector"), bmd)
+            bugsnag_notify(ValueError("Error from SignifAi collector"),
+                           bugsnag_metadata)
             return False
 
 
@@ -234,16 +236,18 @@ def zabbix_key_to_signifai_key(k):
 
 def prepare_REST_event(parsed_data):
     event = {"attributes": {}}
-    provided = set(ATTR_MAP.keys())
+    missing = set(ATTR_MAP.keys())
     event_date = None
     event_time = None
     for k, v in parsed_data.items():
         if k in ATTR_MAP:
-            provided.remove(k)
+            missing.remove(k)
             dst_key = ATTR_MAP[k]
             if k in MORE_MAPS:
                 v = MORE_MAPS[k][v.upper()]
 
+            # Check if we want to put this mapped attr
+            # into 'attributes' or the root of the event
             if "/" in dst_key or dst_key in BARE_ATTRS:
                 event["attributes"][dst_key] = v
             else:
@@ -278,9 +282,9 @@ def prepare_REST_event(parsed_data):
     else:
         event_date = datetime.now()
 
-    if provided:
+    if missing:
         raise ValueError("Missing attributes: {attribs}".format(
-            attribs=str.join(", ", provided)))
+            attribs=str.join(", ", missing)))
 
     event["timestamp"] = int(time.mktime(event_date.timetuple()))
     event["event_source"] = "zabbix"
