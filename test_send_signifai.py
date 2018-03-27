@@ -10,14 +10,23 @@ import os
 import socket
 import time
 import unittest
-import unittest.mock
 
 import send_signifai
 
 try:
+    # Python 3.6
     import http.client as http_client
 except ImportError:
+    # Python 2.7
     import httplib as http_client
+
+try:
+    # Python 3.6
+    import unittest.mock as unittest_mock
+except ImportError:
+    # Python 2.7 with 'mock' module
+    import mock as unittest_mock
+
 
 __author__ = "SignifAI, Inc."
 __copyright__ = "Copyright (C) 2018, SignifAI, Inc."
@@ -51,7 +60,7 @@ class TestHTTPPost(unittest.TestCase):
         self.assertFalse(result)
 
     def test_create_exception(self):
-        with unittest.mock.patch.object(http_client.HTTPSConnection,
+        with unittest_mock.patch.object(http_client.HTTPSConnection,
                                         '__init__',
                                         side_effect=http_client.HTTPException) as conn_call:  # noqa
             result = send_signifai.POST_data(auth_key="", data=self.events)
@@ -62,7 +71,7 @@ class TestHTTPPost(unittest.TestCase):
     def test_connect_exception(self):
         # Should return False
 
-        with unittest.mock.patch.object(http_client.HTTPSConnection,
+        with unittest_mock.patch.object(http_client.HTTPSConnection,
                                         'connect',
                                         side_effect=http_client.HTTPException) as conn_call:  # noqa
             result = send_signifai.POST_data(auth_key="", data=self.events)
@@ -76,7 +85,7 @@ class TestHTTPPost(unittest.TestCase):
         # Should return False
         total_retries = 5
 
-        with unittest.mock.patch.object(http_client.HTTPSConnection,
+        with unittest_mock.patch.object(http_client.HTTPSConnection,
                                         'connect',
                                         side_effect=socket.timeout) as conn_call:  # noqa
             result = send_signifai.POST_data(auth_key="", data=self.events,
@@ -95,7 +104,7 @@ class TestHTTPPost(unittest.TestCase):
                 return True
 
         def getresponse_mock():
-            ret = unittest.mock.Mock()
+            ret = unittest_mock.Mock()
             ret.status = 200
             ret.read.return_value = json.dumps({
                 "success": True,
@@ -103,10 +112,10 @@ class TestHTTPPost(unittest.TestCase):
             })
             return ret
 
-        with unittest.mock.patch.multiple(http_client.HTTPSConnection,
-                                          connect=unittest.mock.DEFAULT,
-                                          getresponse=unittest.mock.DEFAULT,
-                                          request=unittest.mock.DEFAULT) as m:
+        with unittest_mock.patch.multiple(http_client.HTTPSConnection,
+                                          connect=unittest_mock.DEFAULT,
+                                          getresponse=unittest_mock.DEFAULT,
+                                          request=unittest_mock.DEFAULT) as m:
             m['connect'].side_effect = conn_mock
             m['getresponse'].side_effect = getresponse_mock
             result = send_signifai.POST_data(auth_key="", data=self.events,
@@ -119,10 +128,10 @@ class TestHTTPPost(unittest.TestCase):
     #   - Request timeout
     def test_request_timeout(self):
         # Should return False, NOT throw
-        with unittest.mock.patch.multiple(http_client.HTTPSConnection,
-                                          connect=unittest.mock.DEFAULT,
-                                          getresponse=unittest.mock.DEFAULT,
-                                          request=unittest.mock.DEFAULT) as m:
+        with unittest_mock.patch.multiple(http_client.HTTPSConnection,
+                                          connect=unittest_mock.DEFAULT,
+                                          getresponse=unittest_mock.DEFAULT,
+                                          request=unittest_mock.DEFAULT) as m:
             m['request'].side_effect = socket.timeout
             result = send_signifai.POST_data(auth_key="", data=self.events)
         self.assertFalse(result)
@@ -132,10 +141,10 @@ class TestHTTPPost(unittest.TestCase):
     def test_request_httpexception(self):
         # Should return False, NOT throw
 
-        with unittest.mock.patch.multiple(http_client.HTTPSConnection,
-                                          connect=unittest.mock.DEFAULT,
-                                          getresponse=unittest.mock.DEFAULT,
-                                          request=unittest.mock.DEFAULT) as m:
+        with unittest_mock.patch.multiple(http_client.HTTPSConnection,
+                                          connect=unittest_mock.DEFAULT,
+                                          getresponse=unittest_mock.DEFAULT,
+                                          request=unittest_mock.DEFAULT) as m:
             m['request'].side_effect = http_client.HTTPException
             result = send_signifai.POST_data(auth_key="", data=self.events)
         self.assertFalse(result)
@@ -144,10 +153,10 @@ class TestHTTPPost(unittest.TestCase):
     def test_getresponse_timeout(self):
         # Should return False, NOT throw
 
-        with unittest.mock.patch.multiple(http_client.HTTPSConnection,
-                                          connect=unittest.mock.DEFAULT,
-                                          getresponse=unittest.mock.DEFAULT,
-                                          request=unittest.mock.DEFAULT) as m:
+        with unittest_mock.patch.multiple(http_client.HTTPSConnection,
+                                          connect=unittest_mock.DEFAULT,
+                                          getresponse=unittest_mock.DEFAULT,
+                                          request=unittest_mock.DEFAULT) as m:
             m['getresponse'].side_effect = socket.timeout
             result = send_signifai.POST_data(auth_key="", data=self.events)
         self.assertFalse(result)
@@ -155,10 +164,10 @@ class TestHTTPPost(unittest.TestCase):
     #   - Misc. getresponse failure
     def test_getresponse_httpexception(self):
         # Should return False, NOT throw
-        with unittest.mock.patch.multiple(http_client.HTTPSConnection,
-                                          connect=unittest.mock.DEFAULT,
-                                          getresponse=unittest.mock.DEFAULT,
-                                          request=unittest.mock.DEFAULT) as m:
+        with unittest_mock.patch.multiple(http_client.HTTPSConnection,
+                                          connect=unittest_mock.DEFAULT,
+                                          getresponse=unittest_mock.DEFAULT,
+                                          request=unittest_mock.DEFAULT) as m:
             m['getresponse'].side_effect = http_client.HTTPException
             result = send_signifai.POST_data(auth_key="", data=self.events)
         self.assertFalse(result)
@@ -167,11 +176,11 @@ class TestHTTPPost(unittest.TestCase):
     def test_post_bad_status(self):
         # Should return False, NOT throw
 
-        with unittest.mock.patch.multiple(http_client.HTTPSConnection,
-                                          connect=unittest.mock.DEFAULT,
-                                          getresponse=unittest.mock.DEFAULT,
-                                          request=unittest.mock.DEFAULT) as m:
-            resp = unittest.mock.Mock()
+        with unittest_mock.patch.multiple(http_client.HTTPSConnection,
+                                          connect=unittest_mock.DEFAULT,
+                                          getresponse=unittest_mock.DEFAULT,
+                                          request=unittest_mock.DEFAULT) as m:
+            resp = unittest_mock.Mock()
             resp.read.return_value = "500 Internal Server Error"
             resp.status = 500
             m['getresponse'].return_value = resp
@@ -182,11 +191,11 @@ class TestHTTPPost(unittest.TestCase):
     def test_post_bad_response(self):
         # Should return False, NOT throw
 
-        with unittest.mock.patch.multiple(http_client.HTTPSConnection,
-                                          connect=unittest.mock.DEFAULT,
-                                          getresponse=unittest.mock.DEFAULT,
-                                          request=unittest.mock.DEFAULT) as m:
-            resp = unittest.mock.Mock()
+        with unittest_mock.patch.multiple(http_client.HTTPSConnection,
+                                          connect=unittest_mock.DEFAULT,
+                                          getresponse=unittest_mock.DEFAULT,
+                                          request=unittest_mock.DEFAULT) as m:
+            resp = unittest_mock.Mock()
             resp.read.return_value = "this is a bad response text"
             resp.status = 200
             m['getresponse'].return_value = resp
@@ -200,7 +209,7 @@ class TestHTTPPost(unittest.TestCase):
         # Should return False, NOT throw
         def everything_failed_mock(*args, **kwargs):
             body = kwargs['body']
-            mockresponse = unittest.mock.Mock()
+            mockresponse = unittest_mock.Mock()
             mockresponse.read.return_value = json.dumps({
                 "success": False,
                 "failed_events": json.loads(body)['events']
@@ -209,10 +218,10 @@ class TestHTTPPost(unittest.TestCase):
             m['getresponse'].return_value = mockresponse
             return True
 
-        with unittest.mock.patch.multiple(http_client.HTTPSConnection,
-                                          connect=unittest.mock.DEFAULT,
-                                          getresponse=unittest.mock.DEFAULT,
-                                          request=unittest.mock.DEFAULT) as m:
+        with unittest_mock.patch.multiple(http_client.HTTPSConnection,
+                                          connect=unittest_mock.DEFAULT,
+                                          getresponse=unittest_mock.DEFAULT,
+                                          request=unittest_mock.DEFAULT) as m:
             m['request'].side_effect = everything_failed_mock
             result = send_signifai.POST_data(auth_key="", data=self.events)
         self.assertIsNone(result)
@@ -224,7 +233,7 @@ class TestHTTPPost(unittest.TestCase):
 
         def random_event_failure(*args, **kwargs):
             body = kwargs['body']
-            mockresponse = unittest.mock.Mock()
+            mockresponse = unittest_mock.Mock()
             mockresponse.status = 200
             mockresponse.read.return_value = json.dumps({
                 "success": True,
@@ -237,10 +246,10 @@ class TestHTTPPost(unittest.TestCase):
             })
             m['getresponse'].return_value = mockresponse
 
-        with unittest.mock.patch.multiple(http_client.HTTPSConnection,
-                                          connect=unittest.mock.DEFAULT,
-                                          getresponse=unittest.mock.DEFAULT,
-                                          request=unittest.mock.DEFAULT) as m:
+        with unittest_mock.patch.multiple(http_client.HTTPSConnection,
+                                          connect=unittest_mock.DEFAULT,
+                                          getresponse=unittest_mock.DEFAULT,
+                                          request=unittest_mock.DEFAULT) as m:
             m['request'].side_effect = random_event_failure
             result = send_signifai.POST_data(auth_key="", data=events)
         self.assertIsNone(result)
@@ -263,12 +272,12 @@ class TestHTTPPost(unittest.TestCase):
                                   "application/json")
             test_case.assertEqual(method, "POST")
 
-        with unittest.mock.patch.multiple(http_client.HTTPSConnection,
-                                          connect=unittest.mock.DEFAULT,
-                                          getresponse=unittest.mock.DEFAULT,
-                                          request=unittest.mock.DEFAULT) as m:
+        with unittest_mock.patch.multiple(http_client.HTTPSConnection,
+                                          connect=unittest_mock.DEFAULT,
+                                          getresponse=unittest_mock.DEFAULT,
+                                          request=unittest_mock.DEFAULT) as m:
             m['request'].side_effect = request_gen_test
-            mockresp = unittest.mock.Mock()
+            mockresp = unittest_mock.Mock()
             mockresp.status = 200
             mockresp.read.return_value = json.dumps({
                 "success": True,
@@ -283,11 +292,11 @@ class TestHTTPPost(unittest.TestCase):
     #   - All is well
     def test_good_post(self):
         # Should return True
-        with unittest.mock.patch.multiple(http_client.HTTPSConnection,
-                                          connect=unittest.mock.DEFAULT,
-                                          getresponse=unittest.mock.DEFAULT,
-                                          request=unittest.mock.DEFAULT) as m:
-            mockresp = unittest.mock.Mock()
+        with unittest_mock.patch.multiple(http_client.HTTPSConnection,
+                                          connect=unittest_mock.DEFAULT,
+                                          getresponse=unittest_mock.DEFAULT,
+                                          request=unittest_mock.DEFAULT) as m:
+            mockresp = unittest_mock.Mock()
             mockresp.status = 200
             mockresp.read.return_value = json.dumps({
                 "success": True,
@@ -389,8 +398,8 @@ class TestPrepareRESTEvent(unittest.TestCase):
         h = datetime.datetime.now()
         event.pop("EVENT.DATE")
 
-        with unittest.mock.patch('datetime.datetime') as MockDT:
-            MockDT.now = unittest.mock.MagicMock(return_value=h)
+        with unittest_mock.patch('datetime.datetime') as MockDT:
+            MockDT.now = unittest_mock.MagicMock(return_value=h)
 
             j = send_signifai.prepare_REST_event(event)
 
