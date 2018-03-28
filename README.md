@@ -17,7 +17,7 @@ Copy send_signifai.py directly into that directory and `chmod 0755` it.
 2. Click "Media types" from the bar just under the top tabs of
    the screen
 3. Click the "Create media type" button on the far right side of the
-   screen under the bar containing "Media types"
+   screen under the History bar.
 4. Enter "signifai" as the name
 5. Change "Type" to "Script"
 6. Set "Script name" to `send_signifai.py`
