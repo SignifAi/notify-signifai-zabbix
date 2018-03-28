@@ -28,36 +28,37 @@ Copy send_signifai.py directly into that directory and `chmod 0755` it.
 1. Make sure you're in the Administration tab
 2. Enter the Users section (it's the link immediately to the left of
    "Media Types")
-3. Change "User Groups" in the selection box on the right under the
-   Administration sections bar to "Users"
-4. Click the "Create user" button to the right of that selection box
-5. Fill Alias with "signifai", add to whatever user groups you need
-   ("No access to frontend" is recommended), _choose a strong password_
-   and fill the password fields with it, and fill everything else out
-   at your discretion.
-6. Click the "Media" tab.
-7. Click "Add" under the media list (which should say "No media found."
-   at this point)
-8. In the popup, change the type to "signifai"
-9. Put your SignifAI API key in the "Send to" field. 
-10. If it isn't already, ensure that "When active" is set to 1-7,00:00-24:00
-11. Make sure all checkboxes for "Use if severity" are checked
-12. Status should be "Enabled"
-13. Click the "Add" button in the pop-up. The new media should be added
-    to the media list.
-14. Click the "Save" button at the bottom of the page.
-15. Now create a user group by changing the selection box on the right
-    from "Users" to "User Groups" and clicking the Create User Group
-    button
-16. Set "signifai" as the Group name, and add the signifai user to it
-    by selecting it in the box on the right and clicking the « button.
-    Ensure the group is enabled and click into the Permissions tab.
-    Finally, ensure Frontend access is set to Disabled.
-17. Click the "Add" button underneath the list box in the Read only column.
-18. Check everything in the popup. (The SignifAI user must have at least
+3. Click the "Create user group" button on the far right side of the
+   screen, just to the right of the selection box saying "User groups"
+4. Set "signifai" as the Group name. Ensure that the Frontend access
+   selection box is set to Disabled and that the Enabled checkbox is
+   checked, and click into the Permissions tab. 
+5. Click the "Add" button underneath the list box in the Read only column.
+6. Check everything in the popup. (The SignifAI user must have at least
     read access to everything to get notifications)
-19. Once everything is selected, click the Save button at the bottom of
-    the page. 
+7. Once everything is selected, click the Save button at the bottom of
+   the page. 
+8. Now change the "User groups" in the selection box on the right
+   to "Users".
+9. Click the "Create user" button to the right of that selection box
+10. Fill Alias with "signifai", _choose a strong password_ and fill 
+    the password fields with it, and fill everything else out at your 
+    discretion.
+11. Add the "signifai" user group to the Groups list by using the Add 
+    button just to the right of the list box. A pop-up should appear;
+    check the box for "signifai" and click Select. The pop-up should
+    close.
+12. Click the "Media" tab.
+13. Click "Add" under the media list (which should say "No media found."
+    at this point)
+14. In the popup, change the type to "signifai"
+15. Put "signifai" in the "Send to" field. 
+16. If it isn't already, ensure that "When active" is set to 1-7,00:00-24:00
+17. Make sure all checkboxes for "Use if severity" are checked
+18. Ensure that "Status" is "Enabled"
+19. Click the "Add" button in the pop-up. The new media should be added
+    to the media list.
+20. Click the "Save" button at the bottom of the page.
 
 ## 3. Adding the reporting action
 1. Enter the Configuration page from the top tabs of the screen
