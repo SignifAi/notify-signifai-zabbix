@@ -327,7 +327,11 @@ def main(argv=sys.argv):
     l.setLevel(20)
     print(REST_event)
 
-    return POST_data(api_key, REST_event)
+    result = POST_data(api_key, REST_event)
+    if result:
+        return 0
+    else:
+        return 1
 
 if __name__ == "__main__":
     sys.exit(main())
