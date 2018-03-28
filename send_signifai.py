@@ -320,6 +320,9 @@ def main(argv=sys.argv):
         REST_event = prepare_REST_event(msg_data)
     except (ValueError, KeyError) as val_err:
         print("Error validating/preparing event: {msg}".format(msg=val_err))
+        bugsnag_notify(val_err, {
+            "original_message": message_data
+        })
         return 1
 
     l = logging.getLogger("http_post")
