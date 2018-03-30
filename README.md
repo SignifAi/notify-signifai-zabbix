@@ -5,7 +5,7 @@
       * [1. Creating the media type](#1-creating-the-media-type)
       * [2. Creating the SignifAI user and user group](#2-creating-the-signifai-user-and-user-group)
       * [3. Adding the reporting action](#3-adding-the-reporting-action)
-   * [3.X](#3X)
+   * [3.X](#3x)
       * [1. Creating the media type](#1-creating-the-media-type-1)
       * [2. Creating the user group and user](#2-creating-the-user-group-and-user)
       * [3. Creating the notification action](#3-creating-the-notification-action)
