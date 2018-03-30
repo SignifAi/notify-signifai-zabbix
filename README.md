@@ -1,3 +1,8 @@
+# License
+
+This project is licensed under Apache Software License version 2. Please see
+LICENSE for details.
+
 # Installation
 
 This document assumes you've followed the directions at
@@ -211,3 +216,4 @@ Copy send_signifai.py directly into that directory and `chmod 0755` it.
    well.
 7. Click the Add button at the bottom of the page to add this action and hook
    Zabbix notifications up to SignifAI.
+
