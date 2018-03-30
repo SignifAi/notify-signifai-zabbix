@@ -7,7 +7,13 @@ jobs:
     steps:
       - checkout
       - run:
-          command: python ./test_send_signifai.py
+          command: |
+            # mock was backported, we have to install it first
+            pip install mock
+            # tests assume Pacific timezone (this is deliberate
+            # because Zabbix provides times in local time zone)
+            ln -sf /etc/localtime /usr/share/zoneinfo/America/Los_Angeles
+            python ./test_send_signifai.py
   test3.6:
     working_directory: ~/repo
     docker:
@@ -15,7 +21,11 @@ jobs:
     steps:
       - checkout
       - run:
-          command: python ./test_send_signifai.py
+          command: |
+            # tests assume Pacific timezone (this is deliberate
+            # because Zabbix provides times in local time zone)
+            ln -sf /etc/localtime /usr/share/zoneinfo/America/Los_Angeles
+            python ./test_send_signifai.py
 workflows:
   version: 2
   test:
