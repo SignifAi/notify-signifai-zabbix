@@ -1,3 +1,15 @@
+* [License](#license)
+* [Installation](#installation)
+* [Configuration](#configuration)
+   * [2.2+](#22)
+      * [1. Creating the media type](#1-creating-the-media-type)
+      * [2. Creating the SignifAI user and user group](#2-creating-the-signifai-user-and-user-group)
+      * [3. Adding the reporting action](#3-adding-the-reporting-action)
+   * [3.X](#34)
+      * [1. Creating the media type](#1-creating-the-media-type-1)
+      * [2. Creating the user group and user](#2-creating-the-user-group-and-user)
+      * [3. Creating the notification action](#3-creating-the-notification-action)
+
 # License
 
 This project is licensed under Apache Software License version 2. Please see
@@ -18,7 +30,7 @@ Copy send_signifai.py directly into that directory and `chmod 0755` it.
 
 # Configuration
 
-## 2.2
+## 2.2+
 
 ### 1. Creating the media type
 1. Enter the Administration page from the top tabs of the screen
@@ -114,7 +126,7 @@ Copy send_signifai.py directly into that directory and `chmod 0755` it.
 11. Click the "Add" link under the form to add it to the operations list.
 12. Click the "Save" button at the bottom of the page.
 
-## 3.4
+## 3.X
 
 ### 1. Creating the media type
 
