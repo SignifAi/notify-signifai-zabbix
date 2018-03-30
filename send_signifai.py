@@ -44,6 +44,7 @@ except ImportError:
 __author__ = "SignifAI, Inc."
 __copyright__ = "Copyright (C) 2018, SignifAI, Inc."
 __version__ = "1.0"
+__license__ = "ASLv2"
 
 ATTR_MAP = {
     "TRIGGER.DESCRIPTION": "annotations/description",
