@@ -9,7 +9,7 @@ jobs:
       - run:
           command: |
             # mock was backported, we have to install it first
-            pip install mock
+            sudo pip install mock
             # tests assume Pacific timezone (this is deliberate
             # because Zabbix provides times in local time zone)
             sudo ln -sf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
