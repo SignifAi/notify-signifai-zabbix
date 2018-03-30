@@ -12,7 +12,7 @@ jobs:
             pip install mock
             # tests assume Pacific timezone (this is deliberate
             # because Zabbix provides times in local time zone)
-            ln -sf /etc/localtime /usr/share/zoneinfo/America/Los_Angeles
+            sudo ln -sf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
             python ./test_send_signifai.py
   test3.6:
     working_directory: ~/repo
@@ -24,7 +24,7 @@ jobs:
           command: |
             # tests assume Pacific timezone (this is deliberate
             # because Zabbix provides times in local time zone)
-            ln -sf /etc/localtime /usr/share/zoneinfo/America/Los_Angeles
+            sudo ln -sf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
             python ./test_send_signifai.py
 workflows:
   version: 2
